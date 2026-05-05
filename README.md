@@ -2,7 +2,7 @@
 
 Application de suivi de séries TV : catalogue TVMaze, favoris (SharedPreferences), watchlist avec statuts (SQLite).
 
-[![codecov](https://codecov.io/gh/roza/serie_liste/branch/main/graph/badge.svg)](https://codecov.io/gh/roza/serie_liste)
+[![codecov](https://codecov.io/gh/roza/serie_liste/branch/main/graph/badge.svg?v=2)](https://codecov.io/gh/roza/serie_liste)
 
 ![Schéma architecture de l'application](architecture_globale.png "Architecture globale de l'application")
 
