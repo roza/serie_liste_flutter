@@ -7,7 +7,7 @@ Application de suivi de séries TV : catalogue TVMaze, favoris (SharedPreference
 ## App principale
 
 - Étapes 1 à 9 du TD complètes (modèles, services, providers, écrans, tests).
-- **les trois providers** (`SerieProvider`, `FavorisProvider`, `WatchlistProvider`) acceptent leur service via le constructeur — l'injection de dépendance est généralisée, pas seulement `WatchlistProvider`.
+- **les trois providers** (`SerieProvider`, `FavorisProvider`, `WatchlistProvider`) acceptent leur service via le constructeur   (injection de dépendance).
 - Bonus : badge `itemCount` sur l'icône watchlist dans l'AppBar (`lib/screens/serie_list_screen.dart`).
 
 ## Lancer l'app et les tests
@@ -21,9 +21,9 @@ flutter analyze              # 0 issue
 
 ## Différence notable avec le TD
 
-Le TD montre `SerieProvider` et `FavorisProvider` d'abord avec leur service instancié en dur (étapes 3 et 5), puis introduit l'injection de dépendance à l'étape 8 sur `WatchlistProvider`, et propose en exercice (8.4) d'appliquer le même pattern aux deux autres providers.
+Le TD montre `SerieProvider` et `FavorisProvider` d'abord avec leur service instancié en dur (étapes 3 et 5), puis introduit l'injection de dépendance à l'étape 8 sur `WatchlistProvider`, et propose ensuite d'appliquer le même pattern aux deux autres providers.
 
-Cette correction présente directement l'**état final** : injection de dépendance partout. Pour comparer avec son code étape par étape, l'étudiant doit garder à l'esprit que `serie_provider.dart` et `favoris_provider.dart` correspondent à la version de l'étape 8.4, pas à celle des étapes 3 et 5.
+Cette correction présente directement l'**état final** : injection de dépendance partout.
 
 Tests correspondants présents :
 
@@ -33,7 +33,7 @@ Tests correspondants présents :
 
 ## Couverture des tests
 
-Flutter génère un rapport au format `lcov` avec l'option `--coverage`. Les paquets `lcov` et `genhtml` (sur macOS : `brew install lcov` ou `port install lcov`) permettent ensuite d'obtenir un résumé textuel ou HTML.
+Flutter génère un rapport au format `lcov` avec l'option `--coverage`. Les paquets `lcov` et `genhtml` (lcov à installer via apt sous Linux ou WSL, via choco sous Windows, brew ou macports sous mac) permettent ensuite d'obtenir un résumé textuel ou HTML.
 
 ```bash
 # 1. Générer lcov.info pour tous les tests unitaires
