@@ -77,7 +77,10 @@ Par exemple, ajouter ici un test de parcours utilisateur ([`test/integration/use
 
 > **Marie** ouvre SérieListe : elle voit la liste des séries, tape sur *Breaking Bad* pour consulter le détail, l'ajoute aux favoris puis à la watchlist. Elle revient à l'accueil — un badge `1` apparaît sur l'icône watchlist. Elle ouvre l'écran des favoris pour vérifier que *Breaking Bad* y figure, puis l'écran de la watchlist où elle change le statut de visionnage de « À voir » à « En cours ».
 
-Ce seul test utilisera simultanément les 4 écrans, les 3 providers, le routeur GoRouter et la chaîne d'injection de dépendance — `MockHttpClient` (custom, qui route `/shows` vs `/shows/<id>`) + `MockPreferencesService` + SQLite (en mémoire).
+Ce seul test utilise simultanément les 4 écrans, les 3 providers, le routeur GoRouter et la chaîne d'injection de dépendance — `MockHttpClient` (custom, qui route `/shows` vs `/shows/<id>`) + `MockPreferencesService` + SQLite (en mémoire).
+
+Le code est fourni dans test/integration/
+
 
 ```bash
 flutter test --coverage test/                # unitaires + intégration
