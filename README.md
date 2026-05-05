@@ -71,13 +71,13 @@ Avec les tests fournis, la couche métier est couverte à environ **86 %** :
 
 > **Note** : le 0 % sur `preferences_service.dart` n'est pas un trou de qualité — les tests passent par `MockPreferencesService`, qui hérite et surcharge `getFavoris`/`saveFavoris`. Le code de production n'est donc jamais exécuté pendant les tests.
 
-Les fichiers UI (`main.dart`, `router.dart`, `lib/screens/*.dart`) n'apparaissent pas dans le rapport : ils ne sont chargés par aucun test unitaire. Les couvrir nécessiterait des *widget tests* ou des tests d'intégration, hors périmètre du TD6 mais que vous pouvez ajouter à votre projet.
+Les fichiers UI (`main.dart`, `router.dart`, `lib/screens/*.dart`) n'apparaissent pas dans le rapport : ils ne sont chargés par aucun test unitaire. Les couvrir nécessiterait des *widget tests* ou des tests d'intégration que vous devez ajouter à votre projet.
 
-Par exemple, un test de parcours utilisateur ([`test/integration/user_journey_test.dart`](test/integration/user_journey_test.dart)) qui exécute la *user story* suivante :
+Par exemple, ajouter ici un test de parcours utilisateur ([`test/integration/user_journey_test.dart`](test/integration/user_journey_test.dart)) qui exécute la *user story* suivante :
 
 > **Marie** ouvre SérieListe : elle voit la liste des séries, tape sur *Breaking Bad* pour consulter le détail, l'ajoute aux favoris puis à la watchlist. Elle revient à l'accueil — un badge `1` apparaît sur l'icône watchlist. Elle ouvre l'écran des favoris pour vérifier que *Breaking Bad* y figure, puis l'écran de la watchlist où elle change le statut de visionnage de « À voir » à « En cours ».
 
-Ce seul test exerce simultanément les 4 écrans, les 3 providers, le routeur GoRouter et la chaîne complète d'injection de dépendance — `MockHttpClient` (custom, qui route `/shows` vs `/shows/<id>`) + `MockPreferencesService` + SQLite in-memory.
+Ce seul test utilisera simultanément les 4 écrans, les 3 providers, le routeur GoRouter et la chaîne d'injection de dépendance — `MockHttpClient` (custom, qui route `/shows` vs `/shows/<id>`) + `MockPreferencesService` + SQLite (en mémoire).
 
 ```bash
 flutter test --coverage test/                # unitaires + intégration
@@ -86,10 +86,3 @@ lcov --list coverage/lcov.info
 
 Avec ce test ajouté, `lib/screens/*.dart` et `lib/router.dart` apparaissent dans le rapport et la couverture globale dépasse 90 %.
 
-### Pistes pour pousser la couverture > 95 %
-
-Sans toucher au périmètre du TD, trois ajouts permettraient d'atteindre une couverture quasi totale de la couche métier — à proposer en exercice complémentaire :
-
-1. **`PreferencesService` testé directement** (et non via le mock). Utiliser `SharedPreferences.setMockInitialValues({})` dans `setUp` pour fournir une implémentation en mémoire au vrai service. Cible : faire passer `preferences_service.dart` de 0 % à ~100 %.
-2. **Branches de fallback de `Serie.fromJson`** : tests dédiés pour les cas `nom` absent (→ 'Sans titre'), `genres` vide (→ 'Inconnu'), `status` absent (→ 'Unknown'), et le format interne (`toJson()` puis `fromJson()` avec les clés `nom`/`synopsis`/`statut`).
-3. **`SerieProvider.fetchSerieById`** isolé avec `MockHttpClient` — actuellement la méthode est définie mais n'est testée qu'indirectement.
