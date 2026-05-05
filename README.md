@@ -1,8 +1,9 @@
 # serie_liste — correction TD6
 
 Application de suivi de séries TV : catalogue TVMaze, favoris (SharedPreferences), watchlist avec statuts (SQLite).
+
  [![tests](https://github.com/roza/serie_liste_flutter/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/roza/serie_liste_flutter/actions/workflows/coverage.yml)
- 
+
 [![codecov](https://codecov.io/gh/roza/serie_liste_flutter/branch/main/graph/badge.svg)](https://codecov.io/gh/roza/serie_liste_flutter)
 
 ![Schéma architecture de l'application](architecture_globale.png "Architecture globale de l'application")
