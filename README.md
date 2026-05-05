@@ -27,7 +27,7 @@ flutter analyze                                      # 0 issue
 
 Les trois familles de tests sont complémentaires : unitaires pour la couche métier en isolation, *user story* en widget test pour le parcours d'écran à écran, et `integration_test` pour la validation end-to-end avec vraies persistance et API.
 
-## Différence notable avec le TD
+## Différence avec le TD
 
 Le TD montre `SerieProvider` et `FavorisProvider` d'abord avec leur service instancié en dur (étapes 3 et 5), puis introduit l'injection de dépendance à l'étape 8 sur `WatchlistProvider`, et propose ensuite d'appliquer le même pattern aux deux autres providers.
 
