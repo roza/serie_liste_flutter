@@ -25,7 +25,7 @@ flutter test integration_test/app_test.dart -d macos # end-to-end sur device (~1
 flutter analyze                                      # 0 issue
 ```
 
-Les trois familles de tests sont complémentaires : unitaires pour la couche métier en isolation, *user story* en widget test pour le parcours d'écran à écran, et `integration_test` pour la validation end-to-end avec vraies persistance et API.
+Les trois familles de tests sont complémentaires : unitaires pour la couche métier en isolation, *user story* en widget test pour la navigation d'écran à écran, et `integration_test` pour la validation end-to-end avec vraies persistance et API.
 
 ## Différence avec le TD
 
@@ -65,7 +65,7 @@ lcov --list coverage/lcov.info
 
 ### Alternative multiplateforme : `coverde` (sans lcov)
 
-`lcov` est lourd à installer sous Windows. [`coverde`](https://pub.dev/packages/coverde) est un outil Dart pur qui lit `coverage/lcov.info` et fournit résumé, rapport HTML et seuil de couverture — installable simplement via `pub`.
+`lcov` est lourd à installer sous Windows. [`coverde`](https://pub.dev/packages/coverde) est un outil Dart pur qui lit `coverage/lcov.info` et fournit résumé, rapport HTML et seuil de couverture — installable simplement via `pub` sous toutes les plateformes.
 
 #### Installation
 
@@ -110,9 +110,10 @@ Le badge `codecov` en haut du README provient de [Codecov.io](https://about.code
 
 #### Comment fonctionne la CI GitHub Actions
 
-GitHub Actions exécute, à chaque `push` ou *pull request*, un *workflow* décrit dans un fichier YAML sous `.github/workflows/`. Chaque exécution se fait dans un **runner** : une machine virtuelle éphémère (ici `ubuntu-latest` — VM Ubuntu jetable, recréée à chaque run) fournie gratuitement par GitHub pour les dépôts publics. Les *steps* s'enchaînent séquentiellement ; si l'un échoue (code de sortie ≠ 0), le job échoue, le badge passe au rouge et les *checks* de la PR sont marqués en erreur.
+GitHub Actions exécute, à chaque `push` ou *pull request*, un *workflow* décrit dans un fichier YAML sous `.github/workflows/`. Chaque exécution se fait dans un **runner** : une machine virtuelle éphémère (ici `ubuntu-latest` — VM Ubuntu jetable, recréée à chaque run) fournie gratuitement par GitHub pour les dépôts **publics**. 
+Les *steps* (étapes) s'enchaînent séquentiellement ; si l'un échoue (code de sortie ≠ 0), le job échoue, le badge passe au rouge et les *checks* de la PR sont marqués en erreur.
 
-> **VM ou Docker ?** GitHub Actions utilise de **vraies VMs** (Azure), pas des conteneurs : meilleure isolation pour du code non-fiable (PR de forks), support multi-OS (Linux/Windows/macOS), virtualisation imbriquée et outils pré-installés volumineux possibles. **GitLab CI** fait l'inverse — ses *shared runners* exécutent chaque job dans un **conteneur Docker** basé sur l'image que tu indiques (`image: ...` en tête de `.gitlab-ci.yml`) : démarrage plus rapide, meilleure densité, mais Linux uniquement par défaut.
+> **VM ou Docker ?** GitHub Actions utilise de **vraies VMs** (Azure), pas des conteneurs : meilleure isolation pour du code non-fiable (PR de forks), support multi-OS (Linux/Windows/macOS), virtualisation imbriquée et outils pré-installés volumineux possibles. **GitLab CI** le choix des conteneurs — ses *shared runners* exécutent chaque job dans un **conteneur Docker** basé sur l'image souhaitée (`image: ...` en tête de `.gitlab-ci.yml`) : d'où un démarrage plus rapide, une image plus légère, mais Linux uniquement par défaut.
 
 Le fichier [`.github/workflows/coverage.yml`](.github/workflows/coverage.yml) contient :
 
@@ -146,7 +147,8 @@ Pour bloquer réellement les régressions, activer dans GitHub *Settings → Bra
           target: 70%
           threshold: 1%
   ```
-  Codecov publie alors un check distinct (`codecov/project`) qui échoue si la couverture descend sous 70 % — il suffit de l'ajouter aux *required status checks*. Alternative locale : ajouter une étape `coverde check 70` dans le workflow.
+
+Codecov publie alors un check distinct (`codecov/project`) qui échoue si la couverture descend sous 70 % — il suffit de l'ajouter aux *required status checks*. Alternative locale : ajouter une étape `coverde check 70` dans le workflow.
 
 Avec ces règles, **toute PR dont la CI échoue (tests cassés, couverture < seuil) ne peut plus être mergée** ; les pushs directs sur `main` peuvent en plus être interdits via *Restrict who can push to matching branches*.
 
@@ -183,7 +185,7 @@ Avec les tests fournis, la couche métier est couverte à environ **86 %** :
 
 Les fichiers UI (`main.dart`, `router.dart`, `lib/screens/*.dart`) n'apparaissent pas dans le rapport : ils ne sont chargés par aucun test unitaire. Les couvrir nécessiterait des *widget tests* ou des tests d'intégration que vous devez ajouter à votre projet.
 
-Par exemple, ajouter ici un test de parcours utilisateur ([`test/user_story/user_journey_test.dart`](test/user_story/user_journey_test.dart)) qui exécute la *user story* suivante :
+Par exemple, ajoutons ici un test de navigation utilisateur ([`test/user_story/user_journey_test.dart`](test/user_story/user_journey_test.dart)) qui reflète la *user story* suivante :
 
 > **Marie** ouvre SérieListe : elle voit la liste des séries, tape sur *Breaking Bad* pour consulter le détail, l'ajoute aux favoris puis à la watchlist. Elle revient à l'accueil — un badge `1` apparaît sur l'icône watchlist. Elle ouvre l'écran des favoris pour vérifier que *Breaking Bad* y figure, puis l'écran de la watchlist où elle change le statut de visionnage de « À voir » à « En cours ».
 
@@ -196,7 +198,7 @@ flutter test --coverage test/                # unitaires + intégration
 lcov --list coverage/lcov.info
 ```
 
-Avec ce test ajouté, `lib/screens/*.dart` et `lib/router.dart` apparaissent dans le rapport et la couverture globale dépasse 90 %.
+Avec ce test ajouté, `lib/screens/*.dart` et `lib/router.dart` apparaissent dans le rapport et la couverture globale atteint 90 %.
 
 ## Test d'intégration end-to-end (non demandé dans le TD et optionnel dans le projet mais bonus possible)
 
@@ -208,5 +210,4 @@ flutter test integration_test/app_test.dart -d macos    # ou -d windows / -d lin
 
 Le test prend une dizaine de secondes (build de l'app + lancement + scénario), nettoie la persistance avant exécution pour être rejouable.
 
-Pour les détails sur les deux approches (widget test avec fakes vs `integration_test` sur device), la mécanique des microtâches/`pump`, et la pyramide de tests recommandée pour SQLite, voir [`test_integration.md`](test_integration.md).
-
+Pour les détails sur les deux approches (widget test avec fakes vs `integration_test` sur device), la mécanique des microtâches/`pump`, et la pyramide de tests recommandée pour SQLite, voir le doc plus technique [`test_integration.md`](test_integration.md).
