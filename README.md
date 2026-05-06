@@ -62,6 +62,47 @@ flutter test --coverage test/unit/services/watchlist_database_service_test.dart
 lcov --list coverage/lcov.info
 ```
 
+### Alternative multiplateforme : `coverde` (sans lcov)
+
+`lcov` est lourd à installer sous Windows. [`coverde`](https://pub.dev/packages/coverde) est un outil Dart pur qui lit `coverage/lcov.info` et fournit résumé, rapport HTML et seuil de couverture — installable simplement via `pub`.
+
+#### Installation
+
+```bash
+dart pub global activate coverde
+```
+
+Pour utiliser la commande `coverde` directement, il faut que le dossier des binaires `pub` soit dans le `PATH` :
+
+- **Linux / macOS** : ajouter à `~/.bashrc`, `~/.zshrc` ou `~/.profile` :
+  ```bash
+  export PATH="$PATH":"$HOME/.pub-cache/bin"
+  ```
+- **Windows (PowerShell)** : ajouter `%LOCALAPPDATA%\Pub\Cache\bin` au `Path` utilisateur (Paramètres → *Variables d'environnement*), ou en ligne de commande :
+  ```powershell
+  setx PATH "$env:PATH;$env:LOCALAPPDATA\Pub\Cache\bin"
+  ```
+
+Vérification : `coverde --version` doit répondre. Sinon, on peut toujours invoquer `dart pub global run coverde ...` à la place.
+
+#### Utilisation de coverde
+
+```bash
+# 1. Générer lcov.info
+flutter test --coverage
+
+# 2. Résumé textuel par fichier (équivalent de lcov --list)
+coverde value
+
+# 3. Vérifier un seuil minimum (échoue si < 60 %)
+coverde check 60
+
+# 4. Rapport HTML navigable (généré dans coverage/html/ par défaut)
+coverde report
+```
+
+`coverde check` retourne un code de sortie non nul sous le seuil : pratique en CI pour bloquer un merge si la couverture régresse.
+
 ### Résultat attendu
 
 Avec les tests fournis, la couche métier est couverte à environ **86 %** :
