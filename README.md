@@ -41,7 +41,8 @@ Tests correspondants présents :
 
 ## Couverture des tests
 
-Flutter génère un rapport au format `lcov` avec l'option `--coverage`. Les paquets `lcov` et `genhtml` (lcov à installer via apt sous Linux ou WSL, via choco sous Windows, brew ou macports sous mac) permettent ensuite d'obtenir un résumé textuel ou HTML.
+Flutter génère un rapport au format `lcov` avec l'option `--coverage`. Les paquets `lcov` et `genhtml` (lcov à installer via `apt` sous Linux ou WSL, sous Windows, `brew` ou `macports` sous mac) permettent ensuite d'obtenir un résumé textuel ou HTML.
+Si l'installation de ces outils en local vous semble trop fastidieuse, vous pouvez vous contenter d'utiliser `coverde` ou l'intégration continue (CI), cf plus loin.
 
 ```bash
 # 1. Générer lcov.info pour tous les tests unitaires
@@ -103,11 +104,53 @@ coverde report
 
 `coverde check` retourne un code de sortie non nul sous le seuil : pratique en CI pour bloquer un merge si la couverture régresse.
 
-### Intégration continue : badge Codecov
+### Intégration continue avec badge Codecov
 
 Le badge `codecov` en haut du README provient de [Codecov.io](https://about.codecov.io/), qui héberge le rapport de couverture publié à chaque exécution de la CI GitHub Actions.
 
-Mise en place :
+#### Comment fonctionne la CI GitHub Actions
+
+GitHub Actions exécute, à chaque `push` ou *pull request*, un *workflow* décrit dans un fichier YAML sous `.github/workflows/`. Chaque exécution se fait dans un **runner** : une machine virtuelle éphémère (ici `ubuntu-latest` — VM Ubuntu jetable, recréée à chaque run) fournie gratuitement par GitHub pour les dépôts publics. Les *steps* s'enchaînent séquentiellement ; si l'un échoue (code de sortie ≠ 0), le job échoue, le badge passe au rouge et les *checks* de la PR sont marqués en erreur.
+
+> **VM ou Docker ?** GitHub Actions utilise de **vraies VMs** (Azure), pas des conteneurs : meilleure isolation pour du code non-fiable (PR de forks), support multi-OS (Linux/Windows/macOS), virtualisation imbriquée et outils pré-installés volumineux possibles. **GitLab CI** fait l'inverse — ses *shared runners* exécutent chaque job dans un **conteneur Docker** basé sur l'image que tu indiques (`image: ...` en tête de `.gitlab-ci.yml`) : démarrage plus rapide, meilleure densité, mais Linux uniquement par défaut.
+
+Le fichier [`.github/workflows/coverage.yml`](.github/workflows/coverage.yml) contient :
+
+| Bloc | Rôle |
+|---|---|
+| `on: push / pull_request` (branche `main`) | Déclencheur : la CI tourne à chaque push sur `main` et sur chaque PR ciblant `main` |
+| `runs-on: ubuntu-latest` | Choix du runner (VM Ubuntu fournie par GitHub) |
+| `actions/checkout@v4` | Clone le dépôt dans le runner |
+| `subosito/flutter-action@v2` | Installe le SDK Flutter (canal *stable*, avec cache) |
+| `apt-get install lcov` | Installe `lcov` pour le résumé de couverture |
+| `flutter pub get` | Récupère les dépendances |
+| `flutter analyze` | Analyse statique — échoue à la première *issue* |
+| `flutter test --coverage test/` | Exécute tous les tests et produit `coverage/lcov.info` — échoue dès qu'un test casse |
+| `lcov --summary >> $GITHUB_STEP_SUMMARY` | Affiche le résumé directement sur la page du run |
+| `codecov/codecov-action@v4` | Téléverse `lcov.info` vers Codecov |
+
+#### Quand un push ou un merge est bloqué
+
+Par défaut un `push` direct n'est **jamais** bloqué : la CI tourne *après* coup et signale une régression via badge rouge + email.
+
+Pour bloquer réellement les régressions, activer dans GitHub *Settings → Branches → Branch protection rules* sur `main` :
+
+- ✅ *Require status checks to pass before merging* → cocher le check `test` (nom du job dans `coverage.yml`).
+- ✅ *Require branches to be up to date before merging* (optionnel mais recommandé).
+- ✅ Pour imposer un **seuil de couverture**, configurer Codecov via un fichier `codecov.yml` à la racine, p.ex. :
+  ```yaml
+  coverage:
+    status:
+      project:
+        default:
+          target: 70%
+          threshold: 1%
+  ```
+  Codecov publie alors un check distinct (`codecov/project`) qui échoue si la couverture descend sous 70 % — il suffit de l'ajouter aux *required status checks*. Alternative locale : ajouter une étape `coverde check 70` dans le workflow.
+
+Avec ces règles, **toute PR dont la CI échoue (tests cassés, couverture < seuil) ne peut plus être mergée** ; les pushs directs sur `main` peuvent en plus être interdits via *Restrict who can push to matching branches*.
+
+#### Mise en place du token Codecov
 
 1. **Créer un compte** sur [codecov.io](https://about.codecov.io/) en se connectant via GitHub.
 2. **Autoriser le dépôt** : dans le tableau de bord Codecov, sélectionner le dépôt à couvrir (l'app GitHub *Codecov* doit avoir accès à l'organisation/utilisateur).
