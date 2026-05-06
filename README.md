@@ -103,6 +103,24 @@ coverde report
 
 `coverde check` retourne un code de sortie non nul sous le seuil : pratique en CI pour bloquer un merge si la couverture régresse.
 
+### Intégration continue : badge Codecov
+
+Le badge `codecov` en haut du README provient de [Codecov.io](https://about.codecov.io/), qui héberge le rapport de couverture publié à chaque exécution de la CI GitHub Actions.
+
+Mise en place :
+
+1. **Créer un compte** sur [codecov.io](https://about.codecov.io/) en se connectant via GitHub.
+2. **Autoriser le dépôt** : dans le tableau de bord Codecov, sélectionner le dépôt à couvrir (l'app GitHub *Codecov* doit avoir accès à l'organisation/utilisateur).
+3. **Token d'upload** *(uniquement pour les dépôts privés ou si l'upload tokenless échoue)* : récupérer le `CODECOV_TOKEN` dans *Settings → General* sur Codecov, puis l'ajouter dans GitHub : *Settings → Secrets and variables → Actions → New repository secret*, nom `CODECOV_TOKEN`. Pour un dépôt **public**, l'action `codecov/codecov-action` fonctionne sans token.
+4. Le workflow `.github/workflows/coverage.yml` exécute `flutter test --coverage` puis envoie `coverage/lcov.info` via l'action :
+   ```yaml
+   - uses: codecov/codecov-action@v4
+     with:
+       files: coverage/lcov.info
+       token: ${{ secrets.CODECOV_TOKEN }}   # optionnel sur dépôt public
+   ```
+5. Adapter l'URL des badges en haut du README (`roza/serie_liste_flutter`) à votre `<user>/<repo>`.
+
 ### Résultat attendu
 
 Avec les tests fournis, la couche métier est couverte à environ **86 %** :
